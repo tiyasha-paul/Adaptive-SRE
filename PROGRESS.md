@@ -8,8 +8,8 @@ Current phase: 2
 - [x] Phase 1 — Mock services
 - [x] Phase 2 — Models + service graph
 - [x] Phase 3 — Lead engineer + fault injector + docker executor
-- [ ] Phase 4 — Grader
-- [ ] Phase 5 — Environment core
+- [x] Phase 4 — Grader
+- [x] Phase 5 — Environment core
 - [ ] Phase 6 — FastAPI server + Gradio UI
 - [ ] Phase 7 — inference.py
 - [ ] Phase 8 — openenv.yaml + Dockerfile
@@ -32,6 +32,8 @@ Current phase: 2
 - server/lead_engineer.py
 - server/docker_executor.py
 - server/fault_injector.py
+- server/grader.py
+- server/environment.py
 
 ## Decisions that deviate from AGENT.md
 - DB port changed from 5432 to 15432 (local PostgreSQL uses 5432)
@@ -43,4 +45,4 @@ Gen 0 mean reward (hard): TBD
 Gen 1 mean reward (easy): TBD
 
 ## Next step
-Phase 4 — Grader: Implement 3-layer reward function
+Phase 6 — FastAPI server + Gradio UI: Implement server/app.py with OpenEnv endpoints
