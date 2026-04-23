@@ -12,6 +12,10 @@ MODULES = [
     "transformers",
     "trl",
     "unsloth",
+    "accelerate",
+    "peft",
+    "datasets",
+    "bitsandbytes",
     "matplotlib",
     "httpx",
 ]
