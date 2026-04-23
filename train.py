@@ -27,7 +27,10 @@ from typing import Any, Dict, List, Optional
 import httpx
 import torch
 from transformers import AutoTokenizer
-from trl import GRPOConfig, GRPOTrainer
+try:
+    from trl import GRPOConfig, GRPOTrainer
+except ImportError:
+    from trl.trainer import GRPOConfig, GRPOTrainer
 from unsloth import FastLanguageModel
 
 
