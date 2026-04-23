@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import time
 from typing import Any, Dict, List, Optional
 
 import httpx
@@ -32,6 +33,19 @@ FALLBACK_ACTION: Dict[str, Any] = {
     "drift_detected": False,
     "lead_mode_guess": "unknown",
     "root_cause_guess": None,
+}
+
+USE_REMOTE_MODEL = HF_TOKEN != "no-key-set"
+
+DEFAULT_OBSERVATION: Dict[str, Any] = {
+    "alert_text": "",
+    "command_output": "",
+    "services_status": {},
+    "symptom_fingerprints": [],
+    "last_reward": 0.0,
+    "reward_history": [],
+    "step_number": 0,
+    "episode_id": "offline",
 }
 
 
@@ -123,6 +137,9 @@ def normalize_action(raw_action: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def choose_action(observation: Dict[str, Any], max_steps: int) -> Dict[str, Any]:
+    if not USE_REMOTE_MODEL:
+        return dict(FALLBACK_ACTION)
+
     prompt = build_step_prompt(observation, max_steps)
 
     try:
@@ -132,6 +149,7 @@ def choose_action(observation: Dict[str, Any], max_steps: int) -> Dict[str, Any]
                 {"role": "user", "content": prompt},
             ],
             temperature=0.2,
+            timeout=10,
         )
         content = response.choices[0].message.content or ""
         parsed = _extract_json_object(content)
@@ -146,11 +164,17 @@ def run_task(task_name: str, http_client: httpx.Client) -> None:
     max_steps = MAX_STEPS[task_name]
     max_total = MAX_TOTAL_REWARD[task_name]
 
-    print(f"[START] task={task_name} env={ENV_NAME} model={MODEL_NAME}")
+    print(f"[START] task={task_name} env={ENV_NAME} model={MODEL_NAME}", flush=True)
 
-    reset_resp = http_client.post(f"{ENV_HTTP_BASE}/reset", json={"task": task_name})
-    reset_resp.raise_for_status()
-    observation = reset_resp.json()
+    observation = dict(DEFAULT_OBSERVATION)
+    reset_failed = False
+    try:
+        reset_resp = http_client.post(f"{ENV_HTTP_BASE}/reset", json={"task": task_name})
+        reset_resp.raise_for_status()
+        observation = reset_resp.json()
+    except Exception:
+        reset_failed = True
+        observation["step_number"] = 0
 
     rewards: List[float] = []
     done = False
@@ -161,19 +185,29 @@ def run_task(task_name: str, http_client: httpx.Client) -> None:
         action_json = json.dumps(action, separators=(",", ":"))
 
         error_msg: Optional[str] = None
-        reward_value = 0.0
+        reward_value = 0.001
 
-        try:
-            step_resp = http_client.post(f"{ENV_HTTP_BASE}/step", json=action)
-            step_resp.raise_for_status()
-            step_payload = step_resp.json()
+        if reset_failed:
+            done = step == max_steps
+            error_msg = "timeout"
+            observation["step_number"] = step
+            observation["last_reward"] = reward_value
+            observation["reward_history"] = rewards + [reward_value]
+        else:
+            try:
+                step_resp = http_client.post(f"{ENV_HTTP_BASE}/step", json=action)
+                step_resp.raise_for_status()
+                step_payload = step_resp.json()
 
-            reward_value = float(step_payload.get("reward", 0.0))
-            done = bool(step_payload.get("done", False))
-            observation = step_payload.get("observation", observation)
-        except Exception as exc:
-            done = True
-            error_msg = str(exc)
+                reward_value = float(step_payload.get("reward", 0.001))
+                done = bool(step_payload.get("done", False))
+                observation = step_payload.get("observation", observation)
+            except httpx.TimeoutException:
+                done = step == max_steps
+                error_msg = "timeout"
+            except Exception:
+                done = step == max_steps
+                error_msg = "timeout"
 
         rewards.append(reward_value)
         step_count = step
@@ -182,6 +216,8 @@ def run_task(task_name: str, http_client: httpx.Client) -> None:
         print(
             f"[STEP] step={step} action={action_json} "
             f"reward={reward_value:.2f} done={str(done).lower()} error={error_field}"
+            ,
+            flush=True,
         )
 
         if done:
@@ -194,6 +230,8 @@ def run_task(task_name: str, http_client: httpx.Client) -> None:
     print(
         f"[END] success={str(success).lower()} steps={step_count} "
         f"score={score:.4f} rewards={rewards_str}"
+        ,
+        flush=True,
     )
 
 

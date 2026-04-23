@@ -1,0 +1,50 @@
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/gradio/components/dataframe.py:192: UserWarning: The `col_count` parameter is deprecated and will be removed. Please use `column_count` instead.
+  warnings.warn(
+INFO:     Started server process [89031]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:7860 (Press CTRL+C to quit)
+INFO:     127.0.0.1:62332 - "POST /reset HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /reset HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /reset HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /reset HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62375 - "POST /step HTTP/1.1" 200 OK
