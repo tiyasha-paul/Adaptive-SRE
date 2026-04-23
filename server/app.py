@@ -4,7 +4,10 @@ import os
 
 os.environ["MPLBACKEND"] = "Agg"
 
-import gradio as gr
+try:
+    import gradio as gr
+except Exception:
+    gr = None
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -149,6 +152,8 @@ def _ui_step(command: str) -> tuple[Any, ...]:
 
 
 def build_ui() -> gr.Blocks:
+    if gr is None:
+        return None
     with gr.Blocks(title="AdaptiveSRE") as demo:
         gr.Markdown("## AdaptiveSRE Control Panel")
 
@@ -189,13 +194,14 @@ def build_ui() -> gr.Blocks:
 
     return demo
 
-
-demo = build_ui()
-app = gr.mount_gradio_app(app, demo, path="/")
+demo = build_ui() if gr is not None else None
+if demo is not None:
+    app = gr.mount_gradio_app(app, demo, path="/")
 
 
 def main() -> None:
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    if demo is not None:
+        demo.launch(server_name="0.0.0.0", server_port=7860)
 
 
 if __name__ == "__main__":
