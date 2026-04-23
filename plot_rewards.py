@@ -7,9 +7,15 @@ import json
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import matplotlib
-matplotlib.use("Agg")  # Non-interactive backend
-import matplotlib.pyplot as plt
+try:
+    import matplotlib
+
+    matplotlib.use("Agg")  # Non-interactive backend
+    import matplotlib.pyplot as plt
+except ImportError as exc:
+    raise SystemExit(
+        "plot_rewards.py requires matplotlib. Install it first, for example: pip install matplotlib"
+    ) from exc
 
 
 def generate_plot(

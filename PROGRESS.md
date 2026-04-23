@@ -1,7 +1,7 @@
 # PROGRESS.md — AdaptiveSRE Build Status
 
-Last updated: 2026-04-22
-Current phase: 9
+Last updated: 2026-04-23
+Current phase: 10
 
 ## Completed phases
 
@@ -14,7 +14,7 @@ Current phase: 9
 - [x] Phase 6 — FastAPI server + Gradio UI
 - [x] Phase 7 — inference.py
 - [x] Phase 8 — openenv.yaml + Dockerfile
-- [ ] Phase 9 — Training pipeline
+- [x] Phase 9 — Training pipeline
 - [ ] Phase 10 — Full validation
 
 ## Files created (fill as built)
@@ -54,4 +54,4 @@ Gen 1 mean reward (easy): TBD
 
 ## Next step
 
-Phase 9 — Training pipeline: Implement train_colab.ipynb, eval.py, and plot_rewards.py
+Phase 10 — Full validation: Run Colab validation and record measured training/eval results

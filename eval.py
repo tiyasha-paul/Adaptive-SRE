@@ -18,6 +18,7 @@ from train import SREClient, run_episode, DEFAULT_BASE_URL
 
 TASKS = ["easy", "medium", "hard"]
 EPISODES_PER_TASK = 20
+MODEL_NAME = "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit"
 
 
 def load_model(checkpoint_path: str):
