@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib
+import os
 import sys
 from typing import List, Tuple
 
@@ -22,7 +23,17 @@ MODULES = [
 
 
 def check_module(name: str) -> Tuple[bool, str]:
+    if name == "unsloth":
+        try:
+            torch = importlib.import_module("torch")
+            if not torch.cuda.is_available():
+                return True, "skipped on CPU-only runtime"
+        except Exception:
+            return False, "torch import failed before unsloth check"
+
     try:
+        if name == "matplotlib":
+            os.environ["MPLBACKEND"] = "Agg"
         importlib.import_module(name)
         return True, "imported"
     except Exception as exc:  # pragma: no cover - exercised in user environments

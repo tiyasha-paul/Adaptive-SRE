@@ -1,5 +1,9 @@
 from typing import Any, Dict, List, Optional
 
+import os
+
+os.environ["MPLBACKEND"] = "Agg"
+
 import gradio as gr
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
