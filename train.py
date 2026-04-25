@@ -269,37 +269,6 @@ def normalize_action(raw: Dict[str, Any]) -> Dict[str, Any]:
         "root_cause_guess": root,
     }
 
-
-# ── GRPO Reward Function Wrapper ──
-def make_grpo_reward_fn(client: SREClient, task: str):
-    """
-    Returns a reward function compatible with TRL's GRPOTrainer.
-    The reward function takes prompts and completions, runs them through
-    the environment, and returns scalar rewards.
-    """
-
-    def reward_fn(prompts: List[str], completions: List[str], **kwargs) -> List[float]:
-        rewards = []
-        for prompt, completion in zip(prompts, completions):
-            # Parse the completion to get the action
-            action = parse_action_from_text(completion)
-
-            # We need to replay this action in the environment
-            # But GRPO batches multiple completions per prompt — we need episode context
-            # For simplicity in Gen 1, we use the episode reward as the signal
-            # This is a simplification; full implementation would track episode state
-
-            # Run a quick episode to get reward signal
-            try:
-                result = run_episode(client, task, model, tokenizer, device)
-                rewards.append(result["episode_reward"])
-            except Exception:
-                rewards.append(-1.0)  # Penalize failed episodes
-        return rewards
-
-    return reward_fn
-
-
 # ── Main Training Loop ──
 def main():
     parser = argparse.ArgumentParser(description="Train AdaptiveSRE agent with GRPO")
@@ -438,15 +407,6 @@ def main():
             else:
                 rewards.append(0.3)
         return rewards
-
-    # Initialize trainer
-    trainer = GRPOTrainer(
-        model=model,
-        processing_class=tokenizer,
-        reward_funcs=[env_reward_fn],
-        args=training_args,
-        train_dataset=training_data,  # TRL expects dataset format
-    )
 
     # TRL expects datasets.Dataset, not list of dicts. Convert:
     from datasets import Dataset

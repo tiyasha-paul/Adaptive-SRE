@@ -1,6 +1,6 @@
 # PROGRESS.md — AdaptiveSRE Build Status
 
-Last updated: 2026-04-23
+Last updated: 2026-04-25
 Current phase: 10
 
 ## Completed phases
@@ -44,6 +44,14 @@ Current phase: 10
 ## Decisions that deviate from AGENT.md
 
 - DB port changed from 5432 to 15432 (local PostgreSQL uses 5432)
+
+## Critical bugfix updates (2026-04-25)
+
+- requirements.txt: trl version bumped to >=0.18.2,<=0.24.0
+- train.py: fixed training-pipeline issues by removing dead reward wrapper code and duplicate GRPO trainer initialization
+- train_colab.ipynb: fixed uvicorn host binding in Cell 2 startup subprocesses
+- eval.py: added direct mode support for Colab (env_url=direct)
+- Phase 9 status: Code complete, pending Colab validation run
 
 ## Measured results (fill from actual runs)
 

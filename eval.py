@@ -7,13 +7,22 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import torch
 from transformers import AutoTokenizer
 from unsloth import FastLanguageModel
 
-from train import SREClient, run_episode, DEFAULT_BASE_URL
+from train import (
+    SREClient,
+    run_episode,
+    build_prompt,
+    parse_action_from_text,
+    compute_episode_reward,
+    MAX_STEPS,
+    MAX_SEQ_LENGTH,
+    DEFAULT_BASE_URL,
+)
 
 
 TASKS = ["easy", "medium", "hard"]
@@ -34,27 +43,88 @@ def load_model(checkpoint_path: str):
 
 def evaluate_model(model, tokenizer, task: str, env_url: str, episodes: int = 20) -> Dict:
     """Run N episodes and collect statistics."""
-    client = SREClient(base_url=env_url)
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     rewards: List[float] = []
     steps: List[int] = []
     drift_detections: List[bool] = []
 
-    for ep in range(episodes):
-        result = run_episode(client, task, model, tokenizer, device)
-        rewards.append(result["episode_reward"])
-        steps.append(result["num_steps"])
+    if env_url == "direct":
+        # Use direct environment import (for Colab) without HTTP server.
+        from server.environment import SREEnvironment
+        from server.models import SREAction
 
-        # Check if drift was detected (look through trajectory)
-        detected = False
-        for traj in result["trajectory"]:
-            if traj["action"].get("drift_detected"):
-                detected = True
-                break
-        drift_detections.append(detected)
+        def _to_dict(obs: Any) -> Dict[str, Any]:
+            if isinstance(obs, dict):
+                return obs
+            if hasattr(obs, "model_dump"):
+                return obs.model_dump()
+            return dict(obs)
 
-    client.close()
+        env = SREEnvironment()
+
+        for _ in range(episodes):
+            obs = _to_dict(env.reset(task))
+            episode_rewards: List[float] = []
+            episode_steps = 0
+            detected = False
+
+            for step_num in range(1, MAX_STEPS[task] + 1):
+                prompt = build_prompt(obs, MAX_STEPS[task])
+                inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=MAX_SEQ_LENGTH)
+                inputs = {k: v.to(device) for k, v in inputs.items()}
+
+                with torch.no_grad():
+                    outputs = model.generate(
+                        **inputs,
+                        max_new_tokens=256,
+                        temperature=0.7,
+                        top_p=0.9,
+                        do_sample=True,
+                        pad_token_id=tokenizer.pad_token_id,
+                    )
+
+                response_text = tokenizer.decode(
+                    outputs[0][inputs["input_ids"].shape[1]:],
+                    skip_special_tokens=True,
+                )
+                action_dict = parse_action_from_text(response_text)
+                detected = detected or bool(action_dict.get("drift_detected", False))
+
+                try:
+                    step_result = env.step(SREAction(**action_dict))
+                    reward = float(step_result.get("reward", 0.0))
+                    obs = _to_dict(step_result.get("observation", obs))
+                    done = bool(step_result.get("done", False))
+                except Exception:
+                    reward = 0.001
+                    done = True
+
+                episode_rewards.append(reward)
+                episode_steps = step_num
+                if done:
+                    break
+
+            rewards.append(compute_episode_reward(episode_rewards, task))
+            steps.append(episode_steps)
+            drift_detections.append(detected)
+    else:
+        # Default path: evaluate against HTTP server.
+        client = SREClient(base_url=env_url)
+        for _ in range(episodes):
+            result = run_episode(client, task, model, tokenizer, device)
+            rewards.append(result["episode_reward"])
+            steps.append(result["num_steps"])
+
+            # Check if drift was detected (look through trajectory)
+            detected = False
+            for traj in result["trajectory"]:
+                if traj["action"].get("drift_detected"):
+                    detected = True
+                    break
+            drift_detections.append(detected)
+
+        client.close()
 
     return {
         "mean_reward": sum(rewards) / len(rewards),
